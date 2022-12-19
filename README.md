@@ -21,3 +21,23 @@ Write a smart contract in PyTeal which has an input group of 2 transactions.
     - Inner Txn #1) call pact.fi POOL1 and pay ASA1 to receive ASA2.
     - Inner Txn #2) call pact.fi POOL2 and pay received ASA2 from previous tx and receives ASA1
     - Inner Txn #3) send ASA1 back to sender who initiated the "DoSwap" function
+
+## Additional Reference material
+
+`https://testnet.algoexplorer.io/tx/group/BHXv3MOJdEvoBexjdpK92VG4nOV2EmkOV2XZHxTLRyQ%3D`
+`https://testnet.algoexplorer.io/tx/GEXCU3RTRTRJDUC6Q55ACFHII2MPDDCY76TLPPLFQDD7UKLDQRBA`
+`https://pyteal.readthedocs.io/en/stable/index.html`
+`https://www.pact.fi/`
+`https://folks.finance/`
+
+## Getting Started
+
+Check out the following files in the READMEs folder in this order...
+
+- README.sandbox.md
+- README.setup_python.md
+- README.build_and_deploy.md
+
+## Tips and Tricks
+
+Check out the various  files in the READMEs folder

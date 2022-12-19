@@ -9,13 +9,12 @@ Coding Challenge presented by Ludovit Sholz and Laurens Michiels van Kessenich t
 Write a smart contract in PyTeal which has an input group of 2 transactions.
 
 - Gtxn[0] is Asset transfer (ASA1) to the contract address
-- Gtxn[1] is Noop app call - "DoSwap"
-    application_args:
-        - [0] .. constant DoSwap
-        - [1] .. ASA1
-        - [2] .. ASA2
-        - [3] .. POOL1
-        - [4] .. POOL2
+- Gtxn[1] is Noop app call - "DoSwap" with the following application_args...
+    - constant DoSwap
+    - ASA1
+    - ASA2
+    - POOL1 [3]
+    - POOL2 [4]
 
 "DoSwap" will make the following inner txn calls
 

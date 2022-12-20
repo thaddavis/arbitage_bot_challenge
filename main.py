@@ -12,6 +12,7 @@ from scripts.transfer_ASA1_amount_to_contract import transfer_ASA1_amount_to_con
 from scripts.optin_contract_to_asas import optin_contract_to_asas
 from scripts.pact_experiment import pact_experiment
 from scripts.get_txn import get_txn
+from scripts.pact_create_pool import pact_create_pool
 
 if __name__ == "__main__":
     # list_apps_created_by_account()
@@ -28,4 +29,5 @@ if __name__ == "__main__":
     # call_arbitrage_bot_contract_try_2()
     # optin_contract_to_asas()
     # pact_experiment()
-    get_txn()
+    # get_txn()
+    pact_create_pool()

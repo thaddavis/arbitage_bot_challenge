@@ -24,3 +24,6 @@ testnet_algod_port = 443
 testnet_indexer_token = "4DDWlske7J1zToVwoFxb2NeDkBiYok82FnsO4mLj"
 testnet_indexer_server = "https://testnet-algorand.api.purestake.io/idx2"
 testnet_indexer_port = 443
+
+testnet_pool_1 = "<POOL_1_ADDRESS>"  # MIALGO/ALB - ie: 1 MIALGO for 2 ALBs
+testnet_pool_2 = "<POOL_2_ADDRESS>"  # ALB/MIALGO - ie: 1 ALB form 2 MIALGOs

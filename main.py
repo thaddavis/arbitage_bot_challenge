@@ -11,6 +11,7 @@ from scripts.print_ASA_holdings import print_ASA_holdings
 from scripts.transfer_ASA1_amount_to_contract import transfer_ASA1_amount_to_contract
 from scripts.optin_contract_to_asas import optin_contract_to_asas
 from scripts.pact_experiment import pact_experiment
+from scripts.get_txn import get_txn
 
 if __name__ == "__main__":
     # list_apps_created_by_account()
@@ -26,4 +27,5 @@ if __name__ == "__main__":
     # call_arbitrage_bot_contract_try_1()
     # call_arbitrage_bot_contract_try_2()
     # optin_contract_to_asas()
-    pact_experiment()
+    # pact_experiment()
+    get_txn()

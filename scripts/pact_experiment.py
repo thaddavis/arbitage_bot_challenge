@@ -25,9 +25,21 @@ def pact_experiment():
     print('other_coin', other_coin)
 
     # The pool will be fetched regardless of assets order.
-    pools = pact.fetch_pools_by_assets(algo, other_coin)
+    # pools = pact.fetch_pools_by_assets(algo, other_coin)
 
-    # pools = pact.list_pools()
+    pools = pact.list_pools()
     print('pools', pools)
-    pool = pact.fetch_pool_by_id(56999273)
-    print('pool', pool)
+    print('pool', pools['results'][3])
+
+    pool = pools['results'][3]
+    print('___ ___ ___')
+    print(pool)
+
+    pool.prepare_swap(
+        asset=algo,
+        amount=100_000,
+        slippage_pct=2,
+    )
+
+    # pool = pact.fetch_pool_by_id(56999273)
+    # print('pool', pool)

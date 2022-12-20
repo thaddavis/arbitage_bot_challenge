@@ -14,7 +14,8 @@ def approval():
     def do_swap():
         return Seq([
             # InnerTxn to call POOL1 and swap ASA1 for ASA2
-            # InnerTxn to call POOL1 and swap ASA1 for ASA2
+            # InnerTxn to call POOL2 and swap ASA2 for ASA1
+            # InnerTxn to send ASA1 to Sender
             Approve()
         ])
 

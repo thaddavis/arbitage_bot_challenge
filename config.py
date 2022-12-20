@@ -16,3 +16,11 @@ account_c_mnemonic: str = "lawsuit mechanic loan tide indoor mixed blue agent ac
 
 ASA1: int = 74
 ASA2: int = 75
+
+testnet_algod_token = "4DDWlske7J1zToVwoFxb2NeDkBiYok82FnsO4mLj"
+testnet_algod_server = "https://testnet-algorand.api.purestake.io/ps2"
+testnet_algod_port = 443
+
+testnet_indexer_token = "4DDWlske7J1zToVwoFxb2NeDkBiYok82FnsO4mLj"
+testnet_indexer_server = "https://testnet-algorand.api.purestake.io/idx2"
+testnet_indexer_port = 443

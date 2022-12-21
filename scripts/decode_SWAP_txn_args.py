@@ -3,7 +3,7 @@ from base64 import b64decode
 
 def decode_SWAP_txn_args():
     # arg2 = "AAAAAABMPVk="
-    arg2 = "AAAAAAAAAAA="
+    arg2 = "AAAAAAAAACk="
 
     print('arg2', arg2)
     # print('arg2 decoded', int.from_bytes(arg2, byteorder='big'))

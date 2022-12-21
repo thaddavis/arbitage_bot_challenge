@@ -25,6 +25,7 @@ All scripts are triggered through `python main.py`
     run `./scripts/transfer_ASA_amount_to_account.py`
 - View ASA Holders again
     run `./scripts/print_ASA_holdings.py`
-- Call the DoSwap function
+- Call the DoSwap function - Move tokens in and out
     run `./scripts/call_arbitrage_bot_contract.py`
-
+- Opt-out of ASAs
+    run `./scripts/optout_contract_to_ASAs.py`

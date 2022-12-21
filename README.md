@@ -15,6 +15,7 @@ Write a smart contract in PyTeal which has an input group of 2 transactions.
     - [2] ASA2
     - [3] POOL1
     - [4] POOL2
+    - [5] ASA1_Amount
 
 "DoSwap" will make the following inner txn calls
 

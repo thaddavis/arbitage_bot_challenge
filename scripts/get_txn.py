@@ -4,12 +4,12 @@ import json
 import helpers.utils
 
 headers = {
-    "X-API-Key": config.testnet_indexer_token,
+    "X-API-Key": config.indexer_token,
 }
 
 indexer_client = IndexerClient(
-    config.testnet_indexer_token,
-    config.testnet_indexer_server,
+    config.indexer_token,
+    config.indexer_url,
     headers
 )
 

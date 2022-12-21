@@ -6,14 +6,14 @@ import config
 from helpers.utils import get_private_key_from_mnemonic
 
 indexer_client = indexer.IndexerClient(
-    config.algod_token, config.indexer_address)
-algod_client = algod.AlgodClient(config.algod_token, config.algod_address)
+    config.algod_token, config.indexer_url)
+algod_client = algod.AlgodClient(config.algod_token, config.algod_url)
 
 
 def delete_apps_created_by_account():
     account_private_key = get_private_key_from_mnemonic(
         config.account_a_mnemonic)
-    account = config.account_a
+    account = config.account_a_address
     results = indexer_client.search_applications(creator=account)
     # print(results)
     apps_created = results["applications"]

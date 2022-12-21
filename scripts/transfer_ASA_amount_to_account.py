@@ -9,18 +9,18 @@ from algosdk.v2client import algod
 from algosdk.encoding import encode_address
 
 
-algod_client = algod.AlgodClient(config.algod_token, config.algod_address)
+algod_client = algod.AlgodClient(config.algod_token, config.algod_url)
 sender_private_key = get_private_key_from_mnemonic(
     config.account_c_mnemonic)
 
 receiver_private_key = get_private_key_from_mnemonic(
     config.account_a_mnemonic)
 
-ASA1_asset_id: int = config.ASA1
+ASA_asset_id: int = config.ASA_1
 
 
-def transfer_ASA1_amount_to_account():
-    asset_info = algod_client.asset_info(ASA1_asset_id)
+def transfer_ASA_amount_to_account():
+    asset_info = algod_client.asset_info(ASA_asset_id)
     sender_address = account.address_from_private_key(
         sender_private_key)
     receiver_address = account.address_from_private_key(
@@ -43,8 +43,8 @@ def transfer_ASA1_amount_to_account():
         sender,  # sender (str): address of the sender
         params,  # sp (SuggestedParams): suggested params from algod
         receiver,  # receiver (str): address of the receiver
-        1,  # amt (int): amount of asset base units to send
-        ASA1_asset_id  # index (int): index of the asset
+        15,  # amt (int): amount of asset base units to send
+        ASA_asset_id  # index (int): index of the asset
     )
 
     print("signing opt-in txn")
@@ -68,4 +68,4 @@ def transfer_ASA1_amount_to_account():
 
 
 if __name__ == "__main__":
-    transfer_ASA1_amount_to_account()
+    transfer_ASA_amount_to_account()

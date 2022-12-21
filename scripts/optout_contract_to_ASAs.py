@@ -6,7 +6,7 @@ from algosdk import account, constants, logic
 from algosdk.future import transaction
 from algosdk.error import AlgodHTTPError
 from algosdk.v2client import algod
-from algosdk.encoding import encode_address
+from algosdk.encoding import decode_address
 
 
 algod_client = algod.AlgodClient(config.algod_token, config.algod_url)
@@ -16,11 +16,13 @@ ASA1_asset_id: int = config.ASA_1
 ASA2_asset_id: int = config.ASA_2
 
 
-def optin_contract_to_ASAs():
+def optout_contract_to_ASAs():
     print('ASA1_asset_id', ASA1_asset_id)
     print('ASA2_asset_id', ASA2_asset_id)
 
     app_address = logic.get_application_address(config.app_id)
+
+    print('app_id', config.app_id)
     print('app_address', app_address)
 
     sender_address = account.address_from_private_key(
@@ -29,41 +31,29 @@ def optin_contract_to_ASAs():
     params = algod_client.suggested_params()
     params.flat_fee = True
     # "* 2" is how to pool fees for optin inner group txn
-    params.fee = constants.MIN_TXN_FEE * 2
+    params.fee = constants.MIN_TXN_FEE * 3
 
     sender = sender_address
-    receiver = app_address
-
-    note = "Optin to ASAs".encode()
-    amount = 300000
-
-    unsigned_txn_A = transaction.PaymentTxn(
-        sender,
-        params,
-        receiver,
-        amount,
-        None,
-        note
-    )
+    # receiver = app_address
 
     app_args = [
-        "OptinContractToASAs",
+        "OptoutContractToASAs",
         ASA1_asset_id,
-        ASA2_asset_id
+        decode_address(
+            "GVPNGHFMZAFO3ZWXJKQ532T562RJOY7HMCY3PX7BVIVED5SMZXP5ECCWX4"),  # close ASA 1 remainder to this address
+        ASA2_asset_id,
+        decode_address(
+            "GVPNGHFMZAFO3ZWXJKQ532T562RJOY7HMCY3PX7BVIVED5SMZXP5ECCWX4"),  # close ASA 2 remainder to this address
     ]
-    unsigned_txn_B = transaction.ApplicationNoOpTxn(
+    unsigned_txn = transaction.ApplicationNoOpTxn(
         sender, params, config.app_id, app_args, foreign_assets=[ASA1_asset_id, ASA2_asset_id])
 
-    gid = transaction.calculate_group_id([unsigned_txn_A, unsigned_txn_B])
-    unsigned_txn_A.group = gid  # type: ignore
-    unsigned_txn_B.group = gid  # type: ignore
+    gid = transaction.calculate_group_id([unsigned_txn])
+    unsigned_txn.group = gid  # type: ignore
 
-    signed_txn_A = unsigned_txn_A.sign(sender_private_key)
-    signed_txn_B = unsigned_txn_B.sign(sender_private_key)
+    signed_txn = unsigned_txn.sign(sender_private_key)
 
-    signed_group = [signed_txn_A, signed_txn_B]
-
-    tx_id = algod_client.send_transactions(signed_group)
+    tx_id = algod_client.send_transactions([signed_txn])
 
     # wait for confirmation
     try:
@@ -74,7 +64,7 @@ def optin_contract_to_ASAs():
         # print("Transaction information: {}".format(
         #     json.dumps(confirmed_txn, indent=4)))
 
-        print("Successfully Opted-in Contract to ASA's")
+        print("Successfully Opted-out Contract to ASA's")
         print("Result confirmed in round: {}".format(
             confirmed_txn['confirmed-round']))
     except Exception as err:
@@ -82,4 +72,4 @@ def optin_contract_to_ASAs():
 
 
 if __name__ == "__main__":
-    optin_contract_to_ASAs()
+    optout_contract_to_ASAs()

@@ -3,12 +3,12 @@ import pactsdk
 import config
 
 headers = {
-    "X-API-Key": config.testnet_algod_token,
+    "X-API-Key": config.algod_token,
 }
 
 algod_client = AlgodClient(
-    config.testnet_algod_token,
-    config.testnet_algod_server,
+    config.algod_token,
+    config.algod_url,
     headers
 )
 

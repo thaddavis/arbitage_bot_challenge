@@ -11,7 +11,7 @@ import config
 
 def main():
     algod_client = algod.AlgodClient(
-        config.algod_token, config.algod_address)
+        config.algod_token, config.algod_url)
     creator_private_key = get_private_key_from_mnemonic(
         config.account_a_mnemonic
     )
@@ -56,25 +56,25 @@ def main():
     params.flat_fee = True
     params.fee = 1000
 
-    txn = transaction.ApplicationCreateTxn(
-        sender,
-        params,
-        on_complete,
-        approval_program_compiled,
-        clear_state_program_compiled,
-        global_schema,
-        local_schema,
-        app_args,
-    )
-
-    # txn = transaction.ApplicationUpdateTxn(
+    # txn = transaction.ApplicationCreateTxn(
     #     sender,
     #     params,
-    #     config.app_id,
+    #     on_complete,
     #     approval_program_compiled,
-    #     clear_program_compiled,
-    #     app_args
+    #     clear_state_program_compiled,
+    #     global_schema,
+    #     local_schema,
+    #     app_args,
     # )
+
+    txn = transaction.ApplicationUpdateTxn(
+        sender,
+        params,
+        config.app_id,
+        approval_program_compiled,
+        clear_state_program_compiled,
+        app_args
+    )
 
     # sign transaction
     signed_txn = txn.sign(creator_private_key)
@@ -89,11 +89,10 @@ def main():
     # display results
     transaction_response = algod_client.pending_transaction_info(tx_id)
 
-    # print(transaction_response)
+    print(transaction_response)
 
-    app_id = transaction_response["application-index"]
-
-    print("Created new app-id:", app_id)
+    # app_id = transaction_response["application-index"]
+    # print("Created new app-id:", app_id)
 
     # created_app_state = read_created_app_state(
     #     algod_client, account.address_from_private_key(

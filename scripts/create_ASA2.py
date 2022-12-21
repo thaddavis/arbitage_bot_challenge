@@ -5,13 +5,13 @@ from algosdk import constants
 import config
 from helpers.utils import get_private_key_from_mnemonic
 
-algod_client = algod.AlgodClient(config.algod_token, config.algod_address)
+algod_client = algod.AlgodClient(config.algod_token, config.algod_url)
 account_private_key = get_private_key_from_mnemonic(
     config.account_c_mnemonic)
 
 
 def create_ASA2():
-    sender = config.account_c
+    sender = config.account_c_address
     params = algod_client.suggested_params()
     params.flat_fee = True
     params.fee = constants.MIN_TXN_FEE

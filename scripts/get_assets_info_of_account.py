@@ -5,11 +5,11 @@ from algosdk import constants
 import config
 from helpers.utils import get_private_key_from_mnemonic
 
-algod_client = algod.AlgodClient(config.algod_token, config.algod_address)
+algod_client = algod.AlgodClient(config.algod_token, config.algod_url)
 
 
 def get_assets_info_of_account():
-    account = config.account_a
+    account = config.account_a_address
     params = algod_client.suggested_params()
     params.flat_fee = True
     params.fee = constants.MIN_TXN_FEE

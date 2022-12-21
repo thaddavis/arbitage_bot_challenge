@@ -14,6 +14,7 @@ algod_client = algod.AlgodClient(
 sender_private_key = get_private_key_from_mnemonic(
     config.account_a_mnemonic)
 ASA1_asset_id: int = config.ASA_1
+ASA2_asset_id: int = config.ASA_2
 
 
 def call_arbitrage_bot_contract():
@@ -55,9 +56,9 @@ def call_arbitrage_bot_contract():
         "DoSwap",  # function name "DoSwap"
         ASA1_asset_id,  # ASA_1
         "",  # ASA_2
-        decode_address(config.account_a_address),  # POOL_1
-        "",  # POOL_2
-        4
+        decode_address(config.pool_1),  # POOL_1
+        decode_address(config.pool_2),  # POOL_2
+        4  # amount of ASA_1 to send back to the sender
     ]
     unsigned_txn_B = transaction.ApplicationNoOpTxn(
         sender, params, config.app_id, app_args, foreign_assets=[config.ASA_1])

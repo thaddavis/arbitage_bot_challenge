@@ -39,11 +39,7 @@ def optout_contract_to_ASAs():
     app_args = [
         "OptoutContractToASAs",
         ASA1_asset_id,
-        decode_address(
-            "GVPNGHFMZAFO3ZWXJKQ532T562RJOY7HMCY3PX7BVIVED5SMZXP5ECCWX4"),  # close ASA 1 remainder to this address
         ASA2_asset_id,
-        decode_address(
-            "GVPNGHFMZAFO3ZWXJKQ532T562RJOY7HMCY3PX7BVIVED5SMZXP5ECCWX4"),  # close ASA 2 remainder to this address
     ]
     unsigned_txn = transaction.ApplicationNoOpTxn(
         sender, params, config.app_id, app_args, foreign_assets=[ASA1_asset_id, ASA2_asset_id])

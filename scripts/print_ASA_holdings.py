@@ -2,13 +2,17 @@ from algosdk.v2client import indexer, algod
 import config
 import json
 
+headers = {
+    "X-API-Key": config.algod_token,
+}
+
 indexer_client = indexer.IndexerClient(
-    config.algod_token, config.indexer_url)
+    config.algod_token, config.indexer_url, headers)
 
 ASA1_asset_id: int = config.ASA_1
 ASA2_asset_id: int = config.ASA_2
 
-algod_client = algod.AlgodClient(config.algod_token, config.algod_url)
+algod_client = algod.AlgodClient(config.algod_token, config.algod_url, headers)
 
 
 def print_ASA_holdings():

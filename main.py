@@ -1,3 +1,4 @@
+import sys
 from scripts.list_apps_created_by_account import list_apps_created_by_account
 from scripts.delete_apps_created_by_account import delete_apps_created_by_account
 from scripts.call_arbitrage_bot_contract import call_arbitrage_bot_contract
@@ -14,6 +15,18 @@ from scripts.get_txn import get_txn
 from scripts.optout_contract_to_ASAs import optout_contract_to_ASAs
 
 if __name__ == "__main__":
+
+    print('sys.argv[i]', sys.argv[1])
+
+    match sys.argv[1]:
+        case 'print_ASA_holdings':
+            print('** print_ASA_holdings **')
+            print_ASA_holdings()
+        case 'create_ASA1':
+            print('** create_ASA1 **')
+        case _:
+            print('Default Behavior')
+
     # list_apps_created_by_account()
     # delete_apps_created_by_account()
     # transfer_ASA1_to_arbitrage_bot()
@@ -32,7 +45,6 @@ if __name__ == "__main__":
     # optout_contract_to_ASAs()
 
     # --- Final Test Flow ---
-    print_ASA_holdings()
     # optin_contract_to_ASAs()
     # optin_account_to_ASA()
     # transfer_ASA_amount_to_account()

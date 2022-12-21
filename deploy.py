@@ -8,10 +8,14 @@ import json
 
 import config
 
+headers = {
+    "X-API-Key": config.algod_token,
+}
+
 
 def main():
     algod_client = algod.AlgodClient(
-        config.algod_token, config.algod_url)
+        config.algod_token, config.algod_url, headers)
     creator_private_key = get_private_key_from_mnemonic(
         config.account_a_mnemonic
     )

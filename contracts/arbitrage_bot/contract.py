@@ -105,13 +105,15 @@ def approval():
                         Gtxn[1].application_args[0] == DO_SWAP
                     ),
                     # ASA1 Contract Address
-                    # Txn.application_args[1] # ASA1
+                    # Txn.application_args[1] # ASA1 asset id
                     # ASA2 Contract Address
-                    # Txn.application_args[2] # ASA2
+                    # Txn.application_args[2] # ASA2 asset id
                     # POOL1 Contract Address
-                    # Txn.application_args[3] # POOL1
+                    # Txn.application_args[3] # POOL1 address
                     # POOL2 Contract Address
-                    # Txn.application_args[4] # POOL 2
+                    # Txn.application_args[4] # POOL 2 address
+                    # Amount of ASA1 to return to sender
+                    # Txn.application_args[5] # uint64
                     do_swap()
                 ],
                 [

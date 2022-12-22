@@ -25,19 +25,21 @@ def approval():
                 TxnField.asset_receiver: Gtxn[1].application_args[4],
                 TxnField.fee: Int(0)
             }),
-            # InnerTxnBuilder.Next(),
-            # InnerTxnBuilder.SetFields({
-            #     TxnField.type_enum: TxnType.ApplicationCall,
-            #     # POOL 1 app-id
-            #     TxnField.application_id: Btoi(Gtxn[1].application_args[3]),
-            #     TxnField.on_completion: OnComplete.NoOp,
-            #     # Amount of the pair you want from the pool in exchange for the tokens sent in previous txn
-            #     TxnField.sender: Global.current_application_address(),
-            #     TxnField.fee: Int(0),
-            #     TxnField.application_args: [
-            #         Bytes("SWAP"), Gtxn[1].application_args[7]],
-            #     TxnField.applications: [Btoi(Gtxn[1].application_args[3])]
-            # }),
+            InnerTxnBuilder.Next(),
+            InnerTxnBuilder.SetFields({
+                TxnField.type_enum: TxnType.ApplicationCall,
+                # POOL 1 app-id
+                TxnField.application_id: Btoi(Gtxn[1].application_args[3]),
+                TxnField.on_completion: OnComplete.NoOp,
+                # Amount of the pair you want from the pool in exchange for the tokens sent in previous txn
+                TxnField.sender: Global.current_application_address(),
+                TxnField.fee: Int(0),
+                TxnField.application_args: [
+                    Bytes("SWAP"), Gtxn[1].application_args[7]],
+                TxnField.assets: [Btoi(Gtxn[1].application_args[1]), Btoi(
+                    Gtxn[1].application_args[2])],
+                TxnField.applications: [Btoi(Gtxn[1].application_args[3])]
+            }),
             InnerTxnBuilder.Submit(),
             # V2 - Final Solution - Test out Pact.fi API
             # InnerTxn to call POOL1 and swap ASA1 for ASA2

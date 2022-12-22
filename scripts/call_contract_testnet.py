@@ -36,11 +36,11 @@ def call_contract_testnet():
 
     params = algod_client.suggested_params()
     params.flat_fee = True
-    params.fee = constants.MIN_TXN_FEE * 2
+    params.fee = constants.MIN_TXN_FEE * 3
 
     receiver = app_address
     sender = sender_address
-    ASA_1_amount_in = 1138325
+    ASA_1_amount_in = 1708974
     ASA_2_amount_out = 2
 
     # send ASA1 for 1st swap to contract
@@ -63,7 +63,7 @@ def call_contract_testnet():
         ASA_2_amount_out  # 7 amount of ASA_2 receive in exchange
     ]
     unsigned_txn_B = transaction.ApplicationNoOpTxn(
-        sender, params, config.app_id, app_args, foreign_assets=[config.ASA_1, config.ASA_2], accounts=[config.pool_1_address])
+        sender, params, config.app_id, app_args, foreign_assets=[config.ASA_1, config.ASA_2], accounts=[config.pool_1_address], foreign_apps=[config.pool_1_app_id, config.app_id])
 
     gid = transaction.calculate_group_id([unsigned_txn_A, unsigned_txn_B])
 

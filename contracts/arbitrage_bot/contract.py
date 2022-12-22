@@ -31,12 +31,11 @@ def approval():
                 # POOL 1 app-id
                 TxnField.application_id: Btoi(Gtxn[1].application_args[3]),
                 TxnField.on_completion: OnComplete.NoOp,
-                # Amount of the pair you want from the pool in exchange for the tokens sent in previous txn
                 TxnField.sender: Global.current_application_address(),
                 TxnField.fee: Int(0),
                 TxnField.application_args: [
+                    # [7] is the amount of the pair you want from the pool in exchange for the tokens sent in previous txn
                     Bytes("SWAP"), Gtxn[1].application_args[7]],
-
                 TxnField.assets: [Btoi(Gtxn[1].application_args[1]), Btoi(
                     Gtxn[1].application_args[2])],  # ASA1 and ASA2
                 TxnField.applications: [

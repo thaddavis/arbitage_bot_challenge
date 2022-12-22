@@ -4,7 +4,7 @@ from pyteal.ast.bytes import Bytes
 
 from helpers import program
 
-from .modules.constants import DO_SWAP, OPTIN_CONTRACT_TO_ASAS, OPTOUT_CONTRACT_TO_ASAS, CLOSE_OUT_CONTRACT_BALANCE
+from .modules.constants import DO_SWAP, OPTIN_CONTRACT_TO_ASAS, OPTOUT_CONTRACT_TO_ASAS, CLOSE_OUT_CONTRACT_BALANCE, RETURN_ASA_1_TO_SENDER
 
 UINT64_MAX = 0xFFFFFFFFFFFFFFFF
 
@@ -13,16 +13,32 @@ def approval():
     @Subroutine(TealType.none)
     def do_swap():
         return Seq([
-            # V1 - Transfer ASA1 back to sender
             InnerTxnBuilder.Begin(),
             InnerTxnBuilder.SetFields({
                 TxnField.type_enum: TxnType.AssetTransfer,
-                TxnField.xfer_asset: Btoi(Gtxn[1].application_args[1]),  # ASA1
-                # vvv simulate amount of ASA 1 to return to sender vvv
-                TxnField.asset_amount: Btoi(Gtxn[1].application_args[5]),
+                # ASA1 asset id
+                TxnField.xfer_asset: Btoi(Gtxn[1].application_args[1]),
+                # Amount of ASA 1 send to contract will be sent to Pool 1
+                TxnField.asset_amount: Gtxn[0].asset_amount(),
                 TxnField.sender: Global.current_application_address(),
-                TxnField.asset_receiver: Gtxn[1].sender(),
+                # Pool 1 address
+                TxnField.asset_receiver: Gtxn[1].application_args[4],
+                TxnField.fee: Int(0)
+            }),
+            InnerTxnBuilder.Next(),
+            InnerTxnBuilder.SetFields({
+                TxnField.type_enum: TxnType.ApplicationCall,
+                # POOL 1 app-id
+                TxnField.application_id: Btoi(Gtxn[1].application_args[3]),
+                TxnField.on_completion: OnComplete.NoOp,
+                # Amount of the pair you want from the pool in exchange for the tokens sent in previous txn
+                TxnField.sender: Global.current_application_address(),
                 TxnField.fee: Int(0),
+                TxnField.application_args: [
+                    Bytes("SWAP"), Gtxn[1].application_args[7]],
+                TxnField.assets: [Btoi(Gtxn[1].application_args[1]), Btoi(
+                    Gtxn[1].application_args[2])],
+                TxnField.applications: [Btoi(Gtxn[1].application_args[3])]
             }),
             InnerTxnBuilder.Submit(),
             # V2 - Final Solution - Test out Pact.fi API
@@ -32,7 +48,25 @@ def approval():
             Approve()
         ])
 
-    @Subroutine(TealType.none)
+    @ Subroutine(TealType.none)
+    def return_asa_1_to_sender():
+        return Seq([
+            # V1 - Transfer ASA1 back to sender
+            InnerTxnBuilder.Begin(),
+            InnerTxnBuilder.SetFields({
+                TxnField.type_enum: TxnType.AssetTransfer,
+                TxnField.xfer_asset: Btoi(Gtxn[1].application_args[1]),
+                # vvv simulate amount of ASA 1 to return to sender vvv
+                TxnField.asset_amount: Btoi(Gtxn[1].application_args[2]),
+                TxnField.sender: Global.current_application_address(),
+                TxnField.asset_receiver: Gtxn[1].sender(),
+                TxnField.fee: Int(0),
+            }),
+            InnerTxnBuilder.Submit(),
+            Approve()
+        ])
+
+    @ Subroutine(TealType.none)
     def optin_contract_to_asas():
         return Seq([
             InnerTxnBuilder.Begin(),
@@ -57,7 +91,7 @@ def approval():
             Approve()
         ])
 
-    @Subroutine(TealType.none)
+    @ Subroutine(TealType.none)
     def optout_contract_to_asas():
         return Seq([
             InnerTxnBuilder.Begin(),
@@ -82,7 +116,7 @@ def approval():
             Approve()
         ])
 
-    @Subroutine(TealType.none)
+    @ Subroutine(TealType.none)
     def close_out_contract_balance():
         return Seq(
             [
@@ -121,19 +155,35 @@ def approval():
                     And(
                         Global.group_size() == Int(2),
                         Gtxn[0].type_enum() == TxnType.AssetTransfer,
+                        Gtxn[1].type_enum() == TxnType.ApplicationCall,
                         Gtxn[1].application_args[0] == DO_SWAP
+                    ),
+                    # ASA1
+                    # Txn.application_args[1] # ASA1 asset id
+                    # ASA2
+                    # Txn.application_args[2] # ASA2 asset id
+                    # POOL1
+                    # Txn.application_args[3] # POOL 1 app id
+                    # POOL1
+                    # Txn.application_args[4] # POOL 1 address
+                    # POOL2
+                    # Txn.application_args[5] # POOL 2 app id
+                    # POOL2
+                    # Txn.application_args[6] # POOL 2 address
+                    # Amount of the pair you want from the pool in exchange for the ASA tokens arriving in Gtxn[0]
+                    # Txn.application_args[7] # uint64  amount of pair token you want from the pool
+                    do_swap()
+                ],
+                [
+                    And(
+                        Global.group_size() == Int(2),
+                        Gtxn[0].type_enum() == TxnType.AssetTransfer,
+                        Gtxn[1].application_args[0] == RETURN_ASA_1_TO_SENDER
                     ),
                     # ASA1 Contract Address
                     # Txn.application_args[1] # ASA1 asset id
-                    # ASA2 Contract Address
-                    # Txn.application_args[2] # ASA2 asset id
-                    # POOL1 Contract Address
-                    # Txn.application_args[3] # POOL1 address
-                    # POOL2 Contract Address
-                    # Txn.application_args[4] # POOL 2 address
-                    # Amount of ASA1 to return to sender
-                    # Txn.application_args[5] # uint64
-                    do_swap()
+                    # Txn.application_args[2] # Amount of ASA1 to return to sender
+                    return_asa_1_to_sender()
                 ],
                 [
                     Txn.application_args[0] == CLOSE_OUT_CONTRACT_BALANCE,

@@ -4,20 +4,17 @@ import json
 from algosdk.encoding import decode_address
 from algosdk import account, constants, logic
 from algosdk.future import transaction
-from algosdk.error import AlgodHTTPError
-from algosdk.v2client import algod
 from algosdk.encoding import encode_address
 
+from clients.algod import algod_client
 
-algod_client = algod.AlgodClient(
-    config.algod_token, config.algod_url)
 sender_private_key = get_private_key_from_mnemonic(
     config.account_a_mnemonic)
 ASA1_asset_id: int = config.ASA_1
 ASA2_asset_id: int = config.ASA_2
 
 
-def call_arbitrage_bot_contract():
+def call_contract_testnet():
     print('')
     print('call_arbitrage_bot_contract')
     print('')
@@ -39,29 +36,34 @@ def call_arbitrage_bot_contract():
 
     params = algod_client.suggested_params()
     params.flat_fee = True
-    params.fee = constants.MIN_TXN_FEE * 2
+    params.fee = constants.MIN_TXN_FEE * 3
 
     receiver = app_address
     sender = sender_address
+    ASA_1_amount_in = 1708974
+    ASA_2_amount_out = 2
+
     # send ASA1 for 1st swap to contract
     unsigned_txn_A = transaction.AssetTransferTxn(
         sender,  # sender (str): address of the sender
         params,  # sp (SuggestedParams): suggested params from algod
         receiver,  # receiver (str): address of the receiver
-        3,  # amt (int): amount of asset base units to send
-        ASA1_asset_id,  # index (int): index of the asset
+        ASA_1_amount_in,  # amt (int): amount of asset base units to send
+        ASA1_asset_id,  # index (int): index of the asset,
     )
 
     app_args = [
-        "DoSwap",  # function name "DoSwap"
-        ASA1_asset_id,  # ASA_1
-        "",  # ASA_2
-        decode_address(config.pool_1),  # POOL_1
-        decode_address(config.pool_2),  # POOL_2
-        4  # amount of ASA_1 to send back to the sender
+        "DoSwap",  # 0 function name "DoSwap"
+        ASA1_asset_id,  # 1 ASA_1
+        ASA2_asset_id,  # 2 ASA_2
+        config.pool_1_app_id,  # 3 POOL_1 app id
+        decode_address(config.pool_1_address),  # 4 POOL_1 address
+        config.pool_2_app_id,  # 5 POOL_2 app id
+        decode_address(config.pool_2_address),  # 6 POOL_2
+        ASA_2_amount_out  # 7 amount of ASA_2 receive in exchange
     ]
     unsigned_txn_B = transaction.ApplicationNoOpTxn(
-        sender, params, config.app_id, app_args, foreign_assets=[config.ASA_1])
+        sender, params, config.app_id, app_args, foreign_assets=[config.ASA_1, config.ASA_2], accounts=[config.pool_1_address], foreign_apps=[config.pool_1_app_id, config.app_id])
 
     gid = transaction.calculate_group_id([unsigned_txn_A, unsigned_txn_B])
 
@@ -81,8 +83,8 @@ def call_arbitrage_bot_contract():
         confirmed_txn = transaction.wait_for_confirmation(
             algod_client, tx_id, 4)
 
-        # print("Transaction information: {}".format(
-        #     json.dumps(confirmed_txn, indent=4)))
+        print("Transaction information: {}".format(
+            json.dumps(confirmed_txn, indent=4)))
 
         print("Succesfully called the arbitrage bot")
     except Exception as err:
@@ -90,4 +92,15 @@ def call_arbitrage_bot_contract():
 
 
 if __name__ == "__main__":
-    call_arbitrage_bot_contract()
+    call_contract_testnet()
+
+
+# BEFORE...
+
+# PQTU6KMR5TMGZAT3HA5UIUVLYK5HCO5DDL5J6GAWII4YRPUBUOBBCB6GGI -> 9999999991
+# YJ6LDUQDRTC6TNGV7TQVOBGKM7HAQ2UR6M54CMF47TU4GBFZZXYZD5TG34 -> 2615869467
+
+# AFTER EXPECTED...
+
+# PQTU6KMR5TMGZAT3HA5UIUVLYK5HCO5DDL5J6GAWII4YRPUBUOBBCB6GGI -> 9999999988
+# YJ6LDUQDRTC6TNGV7TQVOBGKM7HAQ2UR6M54CMF47TU4GBFZZXYZD5TG34 -> 2615869470

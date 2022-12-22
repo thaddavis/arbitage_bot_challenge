@@ -8,15 +8,15 @@ from algosdk.error import AlgodHTTPError
 from algosdk.v2client import algod
 from algosdk.encoding import decode_address
 
+from clients.algod import algod_client
 
-algod_client = algod.AlgodClient(config.algod_token, config.algod_url)
 sender_private_key = get_private_key_from_mnemonic(
     config.account_a_mnemonic)
 ASA1_asset_id: int = config.ASA_1
 ASA2_asset_id: int = config.ASA_2
 
 
-def optout_contract_to_ASAs():
+def optout_contract_from_ASAs():
     print('ASA1_asset_id', ASA1_asset_id)
     print('ASA2_asset_id', ASA2_asset_id)
 
@@ -68,4 +68,4 @@ def optout_contract_to_ASAs():
 
 
 if __name__ == "__main__":
-    optout_contract_to_ASAs()
+    optout_contract_from_ASAs()

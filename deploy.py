@@ -69,7 +69,10 @@ def main():
     #     global_schema,
     #     local_schema,
     #     app_args,
+    #     foreign_apps=[config.ASA_1, config.ASA_2,
+    #                   config.pool_1_app_id, config.pool_2_app_id]
     # )
+    # print("creating")
 
     txn = transaction.ApplicationUpdateTxn(
         sender,
@@ -77,8 +80,11 @@ def main():
         config.app_id,
         approval_program_compiled,
         clear_state_program_compiled,
-        app_args
+        app_args,
+        foreign_apps=[config.ASA_1, config.ASA_2,
+                      config.pool_1_app_id, config.pool_2_app_id]
     )
+    print("Updating...")
 
     # sign transaction
     signed_txn = txn.sign(creator_private_key)

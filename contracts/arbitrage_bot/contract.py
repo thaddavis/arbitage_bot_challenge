@@ -18,10 +18,10 @@ def approval():
                 TxnField.type_enum: TxnType.AssetTransfer,
                 # ASA1 asset id
                 TxnField.xfer_asset: Btoi(Gtxn[1].application_args[1]),
-                # Amount of ASA 1 send to contract will be sent to Pool 1
+                # Amount of ASA1 sent to this contract is now being sent to POOL 1
                 TxnField.asset_amount: Gtxn[0].asset_amount(),
                 TxnField.sender: Global.current_application_address(),
-                # Pool 1 address
+                # POOL 1 address
                 TxnField.asset_receiver: Gtxn[1].application_args[4],
                 TxnField.fee: Int(0)
             }),
@@ -36,9 +36,11 @@ def approval():
                 TxnField.fee: Int(0),
                 TxnField.application_args: [
                     Bytes("SWAP"), Gtxn[1].application_args[7]],
+
                 TxnField.assets: [Btoi(Gtxn[1].application_args[1]), Btoi(
-                    Gtxn[1].application_args[2])],
-                TxnField.applications: [Btoi(Gtxn[1].application_args[3])]
+                    Gtxn[1].application_args[2])],  # ASA1 and ASA2
+                TxnField.applications: [
+                    Btoi(Gtxn[1].application_args[3])]  # app-id of POOL 1
             }),
             InnerTxnBuilder.Submit(),
             # V2 - Final Solution - Test out Pact.fi API

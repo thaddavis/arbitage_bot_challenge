@@ -42,9 +42,9 @@ def approval():
             }),
             InnerTxnBuilder.Submit(),
             # V2 - Final Solution - Test out Pact.fi API
-            # InnerTxn to call POOL1 and swap ASA1 for ASA2
-            # InnerTxn to call POOL2 and swap ASA2 for ASA1
-            # InnerTxn to send ASA1 to Sender
+            # InnerTxn to call POOL1 and swap ASA1 for ASA2 # WORKS
+            # InnerTxn to call POOL2 and swap ASA2 for ASA1 # TODO
+            # InnerTxn to send ASA1 to Sender # TODO
             Approve()
         ])
 

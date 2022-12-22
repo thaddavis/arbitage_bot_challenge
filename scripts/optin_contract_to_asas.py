@@ -8,8 +8,8 @@ from algosdk.error import AlgodHTTPError
 from algosdk.v2client import algod
 from algosdk.encoding import encode_address
 
+from clients.algod import algod_client
 
-algod_client = algod.AlgodClient(config.algod_token, config.algod_url)
 sender_private_key = get_private_key_from_mnemonic(
     config.account_a_mnemonic)
 ASA1_asset_id: int = config.ASA_1

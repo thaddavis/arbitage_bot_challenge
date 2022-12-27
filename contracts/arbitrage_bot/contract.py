@@ -1,4 +1,6 @@
+from multiprocessing.sharedctypes import Value
 from typing import Tuple
+from more_itertools import last
 from pyteal import *
 from pyteal.ast.bytes import Bytes
 
@@ -10,44 +12,247 @@ UINT64_MAX = 0xFFFFFFFFFFFFFFFF
 
 
 def approval():
+    # old config
+    #
+    # ASA1
+    # Txn.application_args[1] # ASA1 asset id
+    # ASA2
+    # Txn.application_args[2] # ASA2 asset id
+    # POOL1
+    # Txn.application_args[3] # POOL 1 app id
+    # POOL1
+    # Txn.application_args[4] # POOL 1 address
+    # POOL2
+    # Txn.application_args[5] # POOL 2 app id
+    # POOL2
+    # Txn.application_args[6] # POOL 2 address
+    # Amount of the pair you want from the pool in exchange for the ASA tokens arriving in Gtxn[0]
+    # Txn.application_args[7] # uint64  amount of pair token you want from the pool
+    #
+    # New config
+    # in appcall one can reference applications - pools through he wants to swap
+    # he can reference 2 to 3 pools
+    # Txn.application_args[0] = DoSwap
     @Subroutine(TealType.none)
     def do_swap():
-        return Seq([
+
+        return Seq(
+            # 4,672,586,512
+            swap1a := App.globalGetEx(Txn.applications[0], Bytes("A")),
+            Assert(swap1a.hasValue()),
+            # 468,518,264,281
+            swap1b := App.globalGetEx(Txn.applications[0], Bytes("B")),
+            Assert(swap1b.hasValue()),
+            swap1config := App.globalGetEx(Txn.applications[0], Bytes("CONFIG")),
+            Assert(swap1config.hasValue()),
+            # 1E1AB70 31566704
+            swap1assetA := Btoi(Substring(swap1config.value(), Int(0), Int(8))),
+            # 1af71298 452399768
+            swap1assetB := Btoi(Substring(swap1config.value(), Int(8), Int(16))),
+
+            If(swap1assetA == Gtxn[0].xfer_asset()).Then(Seq(
+                asaToSendAtSwap1 := swap1assetA,
+                asaToReceiveAtSwap1 := swap1assetB,
+                amountToReceiveAtSwap1 := Gtxn[0].asset_amount() * swap1b.value() / swap1a.value() - Int(1),
+            )).Else(Seq(
+                Assert(swap1assetB == Gtxn[0].xfer_asset()),
+                asaToSendAtSwap1 := swap1assetB,
+                asaToReceiveAtSwap1 := swap1assetA,
+                amountToReceiveAtSwap1 := Gtxn[0].asset_amount() * swap1a.value() / swap1b.value() - Int(1),
+            )),
+
+            # Assert(config.index)
+            #
             InnerTxnBuilder.Begin(),
             InnerTxnBuilder.SetFields({
                 TxnField.type_enum: TxnType.AssetTransfer,
                 # ASA1 asset id
-                TxnField.xfer_asset: Btoi(Gtxn[1].application_args[1]),
+                TxnField.xfer_asset: asaToSendAtSwap1,
                 # Amount of ASA1 sent to this contract is now being sent to POOL 1
                 TxnField.asset_amount: Gtxn[0].asset_amount(),
                 TxnField.sender: Global.current_application_address(),
                 # POOL 1 address
-                TxnField.asset_receiver: Gtxn[1].application_args[4],
-                TxnField.fee: Int(0)
+                # pool 1 address
+                TxnField.asset_receiver: AppParam.address(Txn.applications[0]),
+                TxnField.fee: Int(1000)
             }),
             InnerTxnBuilder.Next(),
             InnerTxnBuilder.SetFields({
                 TxnField.type_enum: TxnType.ApplicationCall,
                 # POOL 1 app-id
-                TxnField.application_id: Btoi(Gtxn[1].application_args[3]),
+                # pool 1
+                TxnField.application_id: Txn.applications[0],  # pool 1 app id
                 TxnField.on_completion: OnComplete.NoOp,
                 TxnField.sender: Global.current_application_address(),
-                TxnField.fee: Int(0),
+                TxnField.fee: Int(2000),
                 TxnField.application_args: [
-                    # [7] is the amount of the pair you want from the pool in exchange for the tokens sent in previous txn
-                    Bytes("SWAP"), Gtxn[1].application_args[7]],
-                TxnField.assets: [Btoi(Gtxn[1].application_args[1]), Btoi(
-                    Gtxn[1].application_args[2])],  # ASA1 and ASA2
+                    Bytes("SWAP"),
+                    Itob(amountToReceiveAtSwap1)
+                ],
+                TxnField.assets: [
+                    asaToSendAtSwap1,   # usdc
+                    asaToReceiveAtSwap1  # vote
+                ],
                 TxnField.applications: [
-                    Btoi(Gtxn[1].application_args[3])]  # app-id of POOL 1
+                    Txn.applications[0]  # pool 1 app id
+                ]
             }),
             InnerTxnBuilder.Submit(),
-            # V2 - Final Solution - Test out Pact.fi API
-            # InnerTxn to call POOL1 and swap ASA1 for ASA2 # WORKS
-            # InnerTxn to call POOL2 and swap ASA2 for ASA1 # TODO
-            # InnerTxn to send ASA1 to Sender # TODO
+
+
+            # 4,672,586,512
+            swap2a := App.globalGetEx(Txn.applications[1], Bytes("A")),
+            Assert(swap2a.hasValue()),
+            # 468,518,264,281
+            swap2b := App.globalGetEx(Txn.applications[1], Bytes("B")),
+            Assert(swap2b.hasValue()),
+            swap2config := App.globalGetEx(Txn.applications[1], Bytes("CONFIG")),
+            Assert(swap2config.hasValue()),
+            # 1E1AB70 31566704
+            swap2assetA := Btoi(Substring(swap2config.value(), Int(0), Int(8))),
+            # 1af71298 452399768
+            swap2assetB := Btoi(Substring(swap2config.value(), Int(8), Int(16))),
+
+            afterSwap1Balance := AssetHolding.balance(
+                Global.current_application_address(),
+                asaToReceiveAtSwap1
+            ),
+
+            If(swap2assetA == asaToReceiveAtSwap1).Then(Seq(
+                asaToSendAtSwap2 := swap2assetA,
+                asaToReceiveAtSwap2 := swap2assetB,
+                amountToReceiveAtSwap2 := afterSwap1Balance.value() * swap2b.value() / swap2a.value() - Int(1),
+            )).Else(Seq(
+                Assert(swap2assetB == Gtxn[0].xfer_asset()),
+                asaToSendAtSwap2 := swap2assetB,
+                asaToReceiveAtSwap2 := swap2assetA,
+                amountToReceiveAtSwap2 := afterSwap1Balance.value() * swap2a.value() / swap2b.value() - Int(1),
+            )),
+            lastAsset := asaToReceiveAtSwap2,
+
+
+            # Assert(config.index)
+            #
+            InnerTxnBuilder.Begin(),
+            InnerTxnBuilder.SetFields({
+                TxnField.type_enum: TxnType.AssetTransfer,
+                TxnField.xfer_asset: asaToSendAtSwap2,
+                TxnField.asset_amount: afterSwap1Balance,
+                TxnField.sender: Global.current_application_address(),
+                # pool 2 address id
+                TxnField.asset_receiver: AppParam.address(Txn.applications[1]),
+                TxnField.fee: Int(1000)
+            }),
+            InnerTxnBuilder.Next(),
+            InnerTxnBuilder.SetFields({
+                TxnField.type_enum: TxnType.ApplicationCall,
+                TxnField.application_id: Txn.applications[1],  # pool 2 app id
+                TxnField.on_completion: OnComplete.NoOp,
+                TxnField.sender: Global.current_application_address(),
+                TxnField.fee: Int(2000),
+                TxnField.application_args: [
+                    Bytes("SWAP"),
+                    Itob(amountToReceiveAtSwap2)
+                ],
+                TxnField.assets: [
+                    asaToSendAtSwap2,    # vote
+                    asaToReceiveAtSwap2  # usdt
+                ],
+                TxnField.applications: [
+                    Txn.applications[1]  # pool 2 app id
+                ]
+            }),
+            InnerTxnBuilder.Submit(),
+
+            If(Txn.applications.length() >= Int(3), Seq(
+
+                swap3a := App.globalGetEx(Txn.applications[1], Bytes("A")),
+                Assert(swap3a.hasValue()),
+                swap3b := App.globalGetEx(Txn.applications[1], Bytes("B")),
+                Assert(swap3b.hasValue()),
+                swap3config := App.globalGetEx(Txn.applications[1], Bytes("CONFIG")),
+                Assert(swap3config.hasValue()),
+                # 1E1AB70 31566704
+                swap3assetA := Btoi(Substring(swap3config.value(), Int(0), Int(8))),
+                # 1af71298 452399768
+                swap3assetB := Btoi(Substring(swap3config.value(), Int(8), Int(16))),
+
+                afterswap2Balance := AssetHolding.balance(
+                    Global.current_application_address(),
+                    asaToReceiveAtSwap2
+                ),
+
+                If(swap3assetA == asaToReceiveAtSwap2).Then(Seq(
+                    asaToSendAtswap3 := swap3assetA,
+                    asaToReceiveAtswap3 := swap3assetB,
+                    amountToReceiveAtswap3 := afterswap2Balance.value() * swap3b.value() / swap3a.value() - Int(1),
+                )).Else(Seq(
+                    Assert(swap3assetB == Gtxn[0].xfer_asset()),
+                    asaToSendAtswap3 := swap3assetB,
+                    asaToReceiveAtswap3 := swap3assetA,
+                    amountToReceiveAtswap3 := afterswap2Balance.value() * swap3a.value() / swap3b.value() - Int(1),
+                )),
+                lastAsset := amountToReceiveAtswap3,
+
+
+                # Assert(config.index)
+                #
+                InnerTxnBuilder.Begin(),
+                InnerTxnBuilder.SetFields({
+                    TxnField.type_enum: TxnType.AssetTransfer,
+                    TxnField.xfer_asset: asaToSendAtswap3,
+                    TxnField.asset_amount: afterswap2Balance,
+                    TxnField.sender: Global.current_application_address(),
+                    # pool 2 address id
+                    TxnField.asset_receiver: AppParam.address(Txn.applications[2]),
+                    TxnField.fee: Int(1000)
+                }),
+                InnerTxnBuilder.Next(),
+                InnerTxnBuilder.SetFields({
+                    TxnField.type_enum: TxnType.ApplicationCall,
+                    # pool 2 app id
+                    TxnField.application_id: Txn.applications[2],
+                    TxnField.on_completion: OnComplete.NoOp,
+                    TxnField.sender: Global.current_application_address(),
+                    TxnField.fee: Int(2000),
+                    TxnField.application_args: [
+                        Bytes("SWAP"),
+                        Itob(amountToReceiveAtswap3)
+                    ],
+                    TxnField.assets: [
+                        asaToSendAtswap3,    # usdt
+                        asaToReceiveAtswap3  # usdc
+                    ],
+                    TxnField.applications: [
+                        Txn.applications[2]  # pool 2 app id
+                    ]
+                }),
+                InnerTxnBuilder.Submit(),
+                # Assert(config.index)
+                #
+            )),
+
+            lastAssetBalance := AssetHolding.balance(
+                Global.current_application_address(),
+                lastAsset
+            ),
+            Assert(lastAsset == Gtxn[0].xfer_asset()),
+            Assert(lastAssetBalance > Gtxn[0].amount()),
+
+            InnerTxnBuilder.Begin(),
+            InnerTxnBuilder.SetFields({
+                TxnField.type_enum: TxnType.AssetTransfer,
+                TxnField.xfer_asset: lastAsset,
+                TxnField.asset_amount: lastAssetBalance,
+                TxnField.sender: Global.current_application_address(),
+                TxnField.asset_receiver: Gtxn[0].sender(),
+                TxnField.fee: Int(1000)
+            }),
+            InnerTxnBuilder.Submit(),
+
+
             Approve()
-        ])
+        )
 
     @ Subroutine(TealType.none)
     def return_asa_1_to_sender():
